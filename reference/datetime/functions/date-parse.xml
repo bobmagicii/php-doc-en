@@ -18,7 +18,7 @@
    <function>DateTimeImmutable::__construct</function>. Instead of returning a
    Unix timestamp (with <function>strtotime</function>) or a
    <classname>DateTimeImmutable</classname> object (with
-   <function>DateTimeImmutable::__construct</function>, it returns an
+   <function>DateTimeImmutable::__construct</function>), it returns an
    associative array with the information that it could detect in the given
    <parameter>datetime</parameter> string.
   </para>
@@ -54,6 +54,56 @@
    Returns <type>array</type> with information about the parsed date/time
    on success&return.falseforfailure;.
   </para>
+  <para>
+   The returned array has keys for <literal>year</literal>,
+   <literal>month</literal>, <literal>day</literal>, <literal>hour</literal>,
+   <literal>minute</literal>, <literal>second</literal>,
+   <literal>fraction</literal>, and <literal>is_localtime</literal>.
+  </para>
+  <para>
+   If <literal>is_localtime</literal> is present then
+   <literal>zone_type</literal> indicates the type of timezone. For type
+   <literal>1</literal> (UTC offset) the <literal>zone</literal>,
+   <literal>is_dst</literal> fields are added; for type <literal>2</literal>
+   (abbreviation) the fields <literal>tz_abbr</literal>,
+   <literal>is_dst</literal> are added; and for type <literal>3</literal>
+   (timezone identifier) the <literal>tz_abbr</literal>,
+   <literal>tz_id</literal> are added.
+  </para>
+  <para>
+   If relative time elements are present in the
+   <parameter>datetime</parameter> string such as <literal>+3 days</literal>,
+   the then returned array includes a nested array with the key
+   <literal>relative</literal>. This array then contains the keys
+   <literal>year</literal>, <literal>month</literal>, <literal>day</literal>,
+   <literal>hour</literal>, <literal>minute</literal>,
+   <literal>second</literal>, and if necessary <literal>weekday</literal>, and
+   <literal>weekdays</literal>, depending on the string that was passed in.
+  </para>
+  <para>
+   The array includes <literal>warning_count</literal> and
+   <literal>warnings</literal> fields. The first one indicate how many
+   warnings there were.
+   The keys of elements <literal>warnings</literal> array indicate the
+   position in the given <parameter>datetime</parameter> where the warning
+   occurred, with the string value describing the warning itself.
+  </para>
+  <para>
+   The array also contains <literal>error_count</literal> and
+   <literal>errors</literal> fields. The first one indicate how many errors
+   were found.
+   The keys of elements <literal>errors</literal> array indicate the
+   position in the given <parameter>datetime</parameter> where the error
+   occurred, with the string value describing the error itself.
+  </para>
+  <warning>
+   <para>
+    The number of array elements in the <literal>warnings</literal> and
+    <literal>errors</literal> arrays might be less than
+    <literal>warning_count</literal> or <literal>error_count</literal> if they
+    occurred at the same position.
+   </para>
+  </warning>
  </refsect1>
 
  <refsect1 role="errors">
@@ -105,20 +155,32 @@ var_dump(date_parse("2006-12-12 10:00:00.5"));
     <screen>
 <![CDATA[
 array(12) {
-  'year' => int(2006)
-  'month' => int(12)
-  'day' => int(12)
-  'hour' => int(10)
-  'minute' => int(0)
-  'second' => int(0)
-  'fraction' => double(0.5)
-  'warning_count' => int(0)
-  'warnings' => array(0) {
+  ["year"]=>
+  int(2006)
+  ["month"]=>
+  int(12)
+  ["day"]=>
+  int(12)
+  ["hour"]=>
+  int(10)
+  ["minute"]=>
+  int(0)
+  ["second"]=>
+  int(0)
+  ["fraction"]=>
+  float(0.5)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
   }
-  'error_count' => int(0)
-  'errors' => array(0) {
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
   }
-  'is_localtime' => bool(false)
+  ["is_localtime"]=>
+  bool(false)
 }
 ]]>
     </screen>
@@ -143,25 +205,42 @@ var_dump(date_parse("June 2nd, 2022, 10:28:17 BST"));
     <screen>
 <![CDATA[
 array(16) {
-  'year' => int(2022)
-  'month' => int(6)
-  'day' => int(2)
-  'hour' => int(10)
-  'minute' => int(28)
-  'second' => int(17)
-  'fraction' => double(0)
-  'warning_count' => int(0)
-  'warnings' => array(0) {
+  ["year"]=>
+  int(2022)
+  ["month"]=>
+  int(6)
+  ["day"]=>
+  int(2)
+  ["hour"]=>
+  int(10)
+  ["minute"]=>
+  int(28)
+  ["second"]=>
+  int(17)
+  ["fraction"]=>
+  float(0)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
   }
-  'error_count' => int(0)
-  'errors' => array(0) {
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
   }
-  'is_localtime' => bool(true)
-  'zone_type' => int(2)
-  'zone' => int(0)
-  'is_dst' => bool(true)
-  'tz_abbr' => string(3) "BST"
-}]]>
+  ["is_localtime"]=>
+  bool(true)
+  ["zone_type"]=>
+  int(2)
+  ["zone"]=>
+  int(0)
+  ["is_dst"]=>
+  bool(true)
+  ["tz_abbr"]=>
+  string(3) "BST"
+}
+]]>
     </screen>
    </example>
    <example>
@@ -177,23 +256,38 @@ var_dump(date_parse("June 2nd, 2022, 10:28:17 Europe/London"));
     <screen>
 <![CDATA[
 array(14) {
-  'year' => int(2022)
-  'month' => int(6)
-  'day' => int(2)
-  'hour' => int(10)
-  'minute' => int(28)
-  'second' => int(17)
-  'fraction' => double(0)
-  'warning_count' => int(0)
-  'warnings' => array(0) {
+  ["year"]=>
+  int(2022)
+  ["month"]=>
+  int(6)
+  ["day"]=>
+  int(2)
+  ["hour"]=>
+  int(10)
+  ["minute"]=>
+  int(28)
+  ["second"]=>
+  int(17)
+  ["fraction"]=>
+  float(0)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
   }
-  'error_count' => int(0)
-  'errors' => array(0) {
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
   }
-  'is_localtime' => bool(true)
-  'zone_type' => int(3)
-  'tz_id' => string(13) "Europe/London"
-}]]>
+  ["is_localtime"]=>
+  bool(true)
+  ["zone_type"]=>
+  int(3)
+  ["tz_id"]=>
+  string(13) "Europe/London"
+}
+]]>
     </screen>
    </example>
   </para>
@@ -215,21 +309,34 @@ var_dump(date_parse("June 2nd, 2022"));
     <screen>
 <![CDATA[
 array(12) {
-  'year' => int(2022)
-  'month' => int(6)
-  'day' => int(2)
-  'hour' => bool(false)
-  'minute' => bool(false)
-  'second' => bool(false)
-  'fraction' => bool(false)
-  'warning_count' => int(0)
-  'warnings' => array(0) {
+  ["year"]=>
+  int(2022)
+  ["month"]=>
+  int(6)
+  ["day"]=>
+  int(2)
+  ["hour"]=>
+  bool(false)
+  ["minute"]=>
+  bool(false)
+  ["second"]=>
+  bool(false)
+  ["fraction"]=>
+  bool(false)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
   }
-  'error_count' => int(0)
-  'errors' => array(0) {
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
   }
-  'is_localtime' => bool(false)
-}]]>
+  ["is_localtime"]=>
+  bool(false)
+}
+]]>
     </screen>
    </example>
   </para>
@@ -251,30 +358,49 @@ var_dump(date_parse("2006-12-12 10:00:00.5 +1 week +1 hour"));
     <screen>
 <![CDATA[
 array(13) {
-  'year' => int(2006)
-  'month' => int(12)
-  'day' => int(12)
-  'hour' => int(10)
-  'minute' => int(0)
-  'second' => int(0)
-  'fraction' => double(0.5)
-  'warning_count' => int(0)
-  'warnings' => array(0) {
+  ["year"]=>
+  int(2006)
+  ["month"]=>
+  int(12)
+  ["day"]=>
+  int(12)
+  ["hour"]=>
+  int(10)
+  ["minute"]=>
+  int(0)
+  ["second"]=>
+  int(0)
+  ["fraction"]=>
+  float(0.5)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
   }
-  'error_count' => int(0)
-  'errors' => array(0) {
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
   }
-  'is_localtime' => bool(false)
-  'relative' =>
+  ["is_localtime"]=>
+  bool(false)
+  ["relative"]=>
   array(6) {
-    'year' => int(0)
-    'month' => int(0)
-    'day' => int(7)
-    'hour' => int(1)
-    'minute' => int(0)
-    'second' => int(0)
+    ["year"]=>
+    int(0)
+    ["month"]=>
+    int(0)
+    ["day"]=>
+    int(7)
+    ["hour"]=>
+    int(1)
+    ["minute"]=>
+    int(0)
+    ["second"]=>
+    int(0)
   }
-}]]>
+}
+]]>
     </screen>
    </example>
   </para>
@@ -299,31 +425,51 @@ var_dump(date_parse("Thursday, June 2nd"));
     <screen>
 <![CDATA[
 array(13) {
-  'year' => bool(false)
-  'month' => int(6)
-  'day' => int(2)
-  'hour' => int(0)
-  'minute' => int(0)
-  'second' => int(0)
-  'fraction' => double(0)
-  'warning_count' => int(0)
-  'warnings' => array(0) {
+  ["year"]=>
+  bool(false)
+  ["month"]=>
+  int(6)
+  ["day"]=>
+  int(2)
+  ["hour"]=>
+  int(0)
+  ["minute"]=>
+  int(0)
+  ["second"]=>
+  int(0)
+  ["fraction"]=>
+  float(0)
+  ["warning_count"]=>
+  int(0)
+  ["warnings"]=>
+  array(0) {
   }
-  'error_count' => int(0)
-  'errors' => array(0) {
+  ["error_count"]=>
+  int(0)
+  ["errors"]=>
+  array(0) {
   }
-  'is_localtime' => bool(false)
-  'relative' =>
+  ["is_localtime"]=>
+  bool(false)
+  ["relative"]=>
   array(7) {
-    'year' => int(0)
-    'month' => int(0)
-    'day' => int(0)
-    'hour' => int(0)
-    'minute' => int(0)
-    'second' => int(0)
-    'weekday' => int(4)
+    ["year"]=>
+    int(0)
+    ["month"]=>
+    int(0)
+    ["day"]=>
+    int(0)
+    ["hour"]=>
+    int(0)
+    ["minute"]=>
+    int(0)
+    ["second"]=>
+    int(0)
+    ["weekday"]=>
+    int(4)
   }
-}]]>
+}
+]]>
     </screen>
    </example>
   </para>
@@ -335,7 +481,7 @@ array(13) {
    <simplelist>
     <member><function>date_parse_from_format</function> for
     parsing a <parameter>datetime</parameter> with a specific given format</member>
-    <member><function>checkdate</function></member>
+    <member><function>checkdate</function> for Gregorian date validation</member>
     <member><function>getdate</function></member>
    </simplelist>
   </para>

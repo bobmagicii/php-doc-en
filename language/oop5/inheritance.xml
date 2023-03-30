@@ -32,6 +32,9 @@
   <literal>protected</literal> method can be marked as
   <literal>public</literal>, but they cannot be restricted, e.g.
   marking a <literal>public</literal> property as <literal>private</literal>.
+  An exception are constructors, whose visibility can be restricted, e.g.
+  a <literal>public</literal> constructor can be marked as <literal>private</literal>
+  in a child class.
  </para>
 
   <note>
@@ -123,7 +126,7 @@ $bar->printPHP();       // Output: 'PHP is great'
  
    <para>
     If the return type cannot be declared for an overriding method due to PHP cross-version compatibility concerns,
-    a <code>#[ReturnTypeWillChange]</code> attribute can be added to silence the deprecation notice.
+    a <classname>ReturnTypeWillChange</classname> attribute can be added to silence the deprecation notice.
    </para>
  
    <example>
@@ -168,7 +171,7 @@ class MyDateTime extends DateTime
     /**
      * @return DateTime|false
      */
-    #[ReturnTypeWillChange]
+    #[\ReturnTypeWillChange]
     public function modify(string $modifier) { return false; }
 }
  

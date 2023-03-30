@@ -9,7 +9,7 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+  <methodsynopsis role="PDO">
    <modifier>public</modifier> <type class="union"><type>string</type><type>false</type></type><methodname>PDO::lastInsertId</methodname>
    <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>name</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
@@ -64,6 +64,11 @@
    <methodname>PDO::lastInsertId</methodname> triggers an
    <literal>IM001</literal> SQLSTATE.
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
  </refsect1>
 
 </refentry>

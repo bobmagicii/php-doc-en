@@ -9,13 +9,13 @@
  <refsect1 role="description">
   &reftitle.description;
   <para>&style.oop;</para>
-  <methodsynopsis role="oop">
+  <methodsynopsis role="DateTimeZone">
    <modifier>public</modifier> <modifier>static</modifier> <type>array</type><methodname>DateTimeZone::listIdentifiers</methodname>
    <methodparam choice="opt"><type>int</type><parameter>timezoneGroup</parameter><initializer>DateTimeZone::ALL</initializer></methodparam>
    <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>countryCode</parameter><initializer>&null;</initializer></methodparam>
   </methodsynopsis>
   <para>&style.procedural;</para>
-  <methodsynopsis role="procedural">
+  <methodsynopsis>
    <type>array</type><methodname>timezone_identifiers_list</methodname>
    <methodparam choice="opt"><type>int</type><parameter>timezoneGroup</parameter><initializer>DateTimeZone::ALL</initializer></methodparam>
    <methodparam choice="opt"><type class="union"><type>string</type><type>null</type></type><parameter>countryCode</parameter><initializer>&null;</initializer></methodparam>
@@ -58,7 +58,7 @@
    Returns the array of timezone identifiers. Only non-outdated items are
    returned. To get all, including outdated timezone identifiers, use the
    <literal>DateTimeZone::ALL_WITH_BC</literal> as value for
-   <parameter>countryCode</parameter>.
+   <parameter>timezoneGroup</parameter>.
   </para>
  </refsect1>
  

@@ -18,20 +18,45 @@ xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
 highly discouraged.</simpara></warning>'>
 
 <!-- Cautions -->
-<!ENTITY caution.cryptographically-insecure '<caution xmlns="http://docbook.org/ns/docbook"><para>This function does not
-generate cryptographically secure values, and should not be used for cryptographic purposes. If you need a
-cryptographically secure value, consider using <function>random_int</function>, <function>random_bytes</function>, or
-<function>openssl_random_pseudo_bytes</function> instead.</para></caution>'>
+<!ENTITY caution.cryptographically-insecure '<caution xmlns="http://docbook.org/ns/docbook">
+ <para>
+  This function does not generate cryptographically secure values, and <emphasis>must not</emphasis>
+  be used for cryptographic purposes, or purposes that require returned values to be unguessable.
+ </para>
+ <para>
+  If cryptographically secure randomness is required, the <classname>Random\Randomizer</classname> may be
+  used with the <classname>Random\Engine\Secure</classname> engine. For simple use cases, the <function>random_int</function>
+  and <function>random_bytes</function> functions provide a convenient and secure <acronym>API</acronym> that is backed by
+  the operating system’s <acronym>CSPRNG</acronym>.
+ </para>
+</caution>'>
+
+<!ENTITY caution.mt19937-tiny-seed '<caution xmlns="http://docbook.org/ns/docbook">
+ <para>
+  Because the Mt19937 (“Mersenne Twister”) engine accepts only a single 32 bit integer as the
+  seed, the number of possible random sequences is limited to just 2<superscript>32</superscript>
+  (i.e. 4,294,967,296), despite Mt19937’s huge period of 2<superscript>19937</superscript>-1.
+ </para>
+ <para>
+  When relying on either implicit or explicit random seeding, duplications will appear
+  much earlier. Duplicated seeds are expected with 50&#37; probability after less than
+  80,000 randomly generated seeds according to the birthday problem. A 10&#37; probability
+  of a duplicated seed happens after randomly generating roughly 30,000 seeds.
+ </para>
+ <para>
+  This makes Mt19937 unsuitable for applications where duplicated sequences must not happen with
+  more than a negligible probability. If reproducible seeding is required, both the
+  <classname>Random\Engine\Xoshiro256StarStar</classname> and <classname>Random\Engine\PcgOneseq128XslRr64</classname>
+  engines support much larger seeds that are unlikely to collide randomly. If reproducibility
+  is not required, the <classname>Random\Engine\Secure</classname> engine provides cryptographically
+  secure randomness.
+ </para>
+</caution>'>
 
 <!-- Notes -->
 
 <!ENTITY note.bin-safe '<note xmlns="http://docbook.org/ns/docbook"><simpara>This function is
 binary-safe.</simpara></note>'>
-
-<!ENTITY note.locale-single-byte '<note xmlns="http://docbook.org/ns/docbook"><simpara>This function is locale-aware
-and will handle input according to the currently set locale.  However, it only works on single-byte character sets.
-If you need to use multibyte characters (most non-western-European languages) look at the
-<link linkend="book.mbstring">multibyte</link> or <link linkend="book.intl">intl</link> extensions instead.</simpara></note>'>
 
 <!ENTITY note.clearstatcache '<note xmlns="http://docbook.org/ns/docbook"><simpara>The results of this
 function are cached. See <function>clearstatcache</function> for
@@ -580,6 +605,8 @@ is highly discouraged.</simpara></warning>
 
 <!ENTITY example.outputs.82 '<para xmlns="http://docbook.org/ns/docbook">Output of the above example in PHP 8.2:</para>'>
 
+<!ENTITY example.outputs.82.similar '<para xmlns="http://docbook.org/ns/docbook">Output of the above example in PHP 8.2 is similar to:</para>'>
+
 <!ENTITY example.outputs.32bit '<para xmlns="http://docbook.org/ns/docbook">Output of the above example on 32 bit machines:</para>'>
 
 <!ENTITY example.outputs.64bit '<para xmlns="http://docbook.org/ns/docbook">Output of the above example on 64 bit machines:</para>'>
@@ -665,6 +692,20 @@ use.</simpara></note>'>
  </varlistentry>
 '>
 
+<!ENTITY sort.callback.description '<para xmlns="http://docbook.org/ns/docbook">
+ &return.callbacksort;
+</para>
+&callback.cmp;
+<caution xmlns="http://docbook.org/ns/docbook">
+ <para>
+  Returning <emphasis>non-integer</emphasis> values from the comparison
+  function, such as <type>float</type>, will result in an internal cast to
+  <type>int</type> of the callback&apos;s return value. So values such as
+  <literal>0.99</literal> and <literal>0.1</literal> will both be cast to an
+  integer value of <literal>0</literal>, which will compare such values as equal.
+ </para>
+</caution>'>
+
 <!ENTITY ini.shorthandbytes '<simpara xmlns="http://docbook.org/ns/docbook">When an <type>int</type> is used, the
 value is measured in bytes. Shorthand notation, as described
 in <link linkend="faq.using.shorthandbytes">this FAQ</link>, may also be used.
@@ -703,6 +744,8 @@ files from the PHP folder into the Windows system directory also works
 
 <!ENTITY foreach '<link xmlns="http://docbook.org/ns/docbook" linkend="control-structures.foreach">foreach</link>'>
 
+<!ENTITY match '<link xmlns="http://docbook.org/ns/docbook" linkend="control-structures.match">match</link>'>
+
 <!ENTITY yield '<link xmlns="http://docbook.org/ns/docbook" linkend="control-structures.yield">yield</link>'>
 
 <!ENTITY parameter.context 'Refer to the <link xmlns="http://docbook.org/ns/docbook" linkend="context">context</link>
@@ -712,6 +755,13 @@ section of the manual for a description of <literal xmlns="http://docbook.org/ns
 searched for within the <link xmlns="http://docbook.org/ns/docbook" linkend="ini.include-path">include_path</link>'>
 
 <!-- Returns -->
+
+<!ENTITY return.type.true '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.2.0</entry>
+ <entry>
+  The return type is &true; now; previously, it was <type>bool</type>.
+ </entry>
+</row>'>
 
 <!ENTITY return.falseforfailure ' or &false; on failure'>
 <!ENTITY return.falseforfailure.style.procedural '&style.procedural; returns &false; on failure.'>
@@ -740,6 +790,15 @@ function.</simpara></warning>'>
  <entry>
   Calling this function on &object;s is deprecated.
   Either use <function>get_mangled_object_vars</function> on the &object; first, or use <classname>ArrayIterator</classname>.
+ </entry>
+</row>
+'>
+
+<!ENTITY standard.changelog.binary-safe-string-comparison '<row xmlns="http://docbook.org/ns/docbook">
+ <entry>8.2.0</entry>
+ <entry>
+  This function now returns <literal>-1</literal> or <literal>1</literal>,
+  where it previously returned a negative or positive number.
  </entry>
 </row>
 '>
@@ -948,7 +1007,7 @@ purposes.</simpara></warning>'>
  <entry>8.0.0</entry>
  <entry>
   <parameter>image</parameter> expects a <classname>GdImage</classname>
-  instance now; previously, a <type>resource</type> was expected.
+  instance now; previously, a valid <literal>gd</literal> <type>resource</type> was expected.
  </entry>
 </row>'>
 
@@ -1081,7 +1140,7 @@ returned by <function>dbmopen</function>.</para></listitem></varlistentry>'>
  <entry>8.1.0</entry>
  <entry>
   The <parameter>imap</parameter> parameter expects an <classname>IMAP\Connection</classname>
-  instance now; previously, a &resource; was expected.
+  instance now; previously, a valid <literal>imap</literal> &resource; was expected.
  </entry>
 </row>'>
 
@@ -1156,7 +1215,7 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
  <entry>8.1.0</entry>
  <entry>
   The <parameter>ldap</parameter> parameter expects an <classname>LDAP\Connection</classname>
-  instance now; previously, a &resource; was expected.
+  instance now; previously, a valid <literal>ldap link</literal> &resource; was expected.
  </entry>
 </row>'>
 
@@ -1164,7 +1223,7 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
  <entry>8.1.0</entry>
  <entry>
   The <parameter>entry</parameter> parameter expects an <classname>LDAP\ResultEntry</classname>
-  instance now; previously, a &resource; was expected.
+  instance now; previously, a valid <literal>ldap result entry</literal> &resource; was expected.
  </entry>
 </row>'>
 
@@ -1172,7 +1231,7 @@ Passing untrusted data to this parameter is <emphasis>insecure</emphasis>, unles
  <entry>8.1.0</entry>
  <entry>
   The <parameter>result</parameter> parameter expects an <classname>LDAP\Result</classname>
-  instance now; previously, a &resource; was expected.
+  instance now; previously, a valid <literal>ldap result</literal> &resource; was expected.
  </entry>
 </row>'>
 
@@ -1250,6 +1309,14 @@ encoding value will be used.</para>'>
 
 <!-- memcached notes -->
 
+<!ENTITY memcached.note.delete-time '<note xmlns="http://docbook.org/ns/docbook"><simpara>
+       As of memcached 1.3.0 (released 2009) this feature is no longer
+       supported. Passing a non-zero <parameter>time</parameter> will cause
+       the deletion to fail. <methodname>Memcached::getResultCode</methodname>
+       will return <constant>MEMCACHED_INVALID_ARGUMENTS</constant>.
+      </simpara></note>
+'>
+
 <!ENTITY memcached.parameter.expiration 'The expiration time, defaults to 0. See <link
  linkend="memcached.expiration" xmlns="http://docbook.org/ns/docbook">Expiration Times</link> for more info.'>
 
@@ -1262,6 +1329,19 @@ encoding value will be used.</para>'>
 <!ENTITY memcached.parameter.value 'The value to store.'>
 
 <!ENTITY memcached.result.getresultcode 'Use <methodname xmlns="http://docbook.org/ns/docbook">Memcached::getResultCode</methodname> if necessary.'>
+
+<!ENTITY memcached.result.delete-multi '<para xmlns="http://docbook.org/ns/docbook">
+   Returns an array indexed by <parameter>keys</parameter>. Each element
+   is &true; if the corresponding key was deleted, or one of the
+   <constant>Memcached::RES_*</constant> constants if the corresponding deletion
+   failed.
+   </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   The <methodname>Memcached::getResultCode</methodname> will return
+   the result code for the last executed delete operation, that is, the delete
+   operation for the last element of <parameter>keys</parameter>.
+  </para>
+'>
 
 <!-- password notes -->
 
@@ -1294,6 +1374,14 @@ encoding value will be used.</para>'>
 <!ENTITY pspell.parameter.pspell-dictionary '<para xmlns="http://docbook.org/ns/docbook">An <classname>PSpell\Dictionary</classname> instance.</para>'>
 
 <!ENTITY pspell.parameter.pspell-config '<para xmlns="http://docbook.org/ns/docbook">An <classname>PSpell\Config</classname> instance.</para>'>
+
+<!-- RNP -->
+
+<!ENTITY rnp.parameter.ffi-description 'The FFI object returned by rnp_ffi_create.'>
+
+<!ENTITY rnp.parameter.key-format 'The key format of the data (GPG, KBX, G10).'>
+
+<!ENTITY rnp.parameter.loadsave-flags 'See RNP_LOAD_SAVE_* flags description.'>
 
 <!-- socket entities -->
 
@@ -1401,7 +1489,9 @@ The function modifies this object.</para></listitem></varlistentry>'>
 returned by <function>timezone_open</function></para></listitem></varlistentry>'>
 
 <!ENTITY date.datetime.return.modifiedobjectorfalseforfailure 'Returns the modified <classname xmlns="http://docbook.org/ns/docbook">DateTime</classname> object for method chaining&return.falseforfailure;.'>
+<!ENTITY date.datetime.return.modifiedobject 'Returns the modified <classname xmlns="http://docbook.org/ns/docbook">DateTime</classname> object for method chaining.'>
 <!ENTITY date.datetimeimmutable.return.modifiedobjectorfalseforfailure 'Returns a new <classname xmlns="http://docbook.org/ns/docbook">DateTimeImmutable</classname> object with the modified data &return.falseforfailure;.'>
+<!ENTITY date.datetimeimmutable.return.modifiedobject 'Returns a new <classname xmlns="http://docbook.org/ns/docbook">DateTimeImmutable</classname> object with the modified data.'>
 
 <!ENTITY date.timezone.dbversion 'This list is based upon the timezone database version'>
 
@@ -1769,6 +1859,17 @@ driver, if your code can run against multiple drivers.</simpara>'>
 
 <!ENTITY pdo.errors.exception-not-errmode '<note xmlns="http://docbook.org/ns/docbook"><simpara>An exception is raised even when the <constant>PDO::ATTR_ERRMODE</constant> attribute is not <constant>PDO::ERRMODE_EXCEPTION</constant>.</simpara></note>'>
 
+<!-- PDO errors -->
+
+<!ENTITY pdo.errors '<para xmlns="http://docbook.org/ns/docbook">
+Emits an error with level <constant>E_WARNING</constant> if the attribute <constant>PDO::ATTR_ERRMODE</constant> is set
+to <constant>PDO::ERRMODE_WARNING</constant>.
+</para>
+<para xmlns="http://docbook.org/ns/docbook">
+Throws a <classname>PDOException</classname> if the attribute <constant>PDO::ATTR_ERRMODE</constant>
+is set to <constant>PDO::ERRMODE_EXCEPTION</constant>.
+</para>'>
+
 <!-- PECL entities -->
 <!ENTITY pecl.moved 'This <link xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="&url.pecl;">PECL</link> extension
 is not bundled with PHP.'>
@@ -1795,7 +1896,7 @@ this extension is still available within <acronym xmlns="http://docbook.org/ns/d
 <link xmlns="http://docbook.org/ns/docbook" linkend="install.windows.building">building on Windows</link>
 section.'>
 
-<!ENTITY pecl.windows.download.avail 'Windows binaries (<acronym xmlns="http://docbook.org/ns/docbook">DLL</acronym> files) 
+<!ENTITY pecl.windows.download.avail 'Windows binaries (<acronym xmlns="http://docbook.org/ns/docbook">DLL</acronym> files)
 for this <acronym xmlns="http://docbook.org/ns/docbook">PECL</acronym> extension are available from the PECL website.'>
 
 <!ENTITY pecl.windows.download.unbundled '&pecl.windows.download;'>
@@ -1948,9 +2049,13 @@ the number will be returned as a &string;.</para></note>'>
 <title>Security warning: SQL injection</title><para>If the query contains any variable
 input then <link linkend="mysqli.quickstart.prepared-statements">parameterized
 prepared statements</link> should be used instead. Alternatively, the
-data must be properly formatted and all strings must be escaped using 
+data must be properly formatted and all strings must be escaped using
 the <function>mysqli_real_escape_string</function>
 function.</para></warning>'>
+<!ENTITY mysqli.conditionalexception '<para xmlns="http://docbook.org/ns/docbook">
+If mysqli error reporting is enabled (<constant>MYSQLI_REPORT_ERROR</constant>) and the requested operation fails,
+a warning is generated. If, in addition, the mode is set to <constant>MYSQLI_REPORT_STRICT</constant>,
+a <classname>mysqli_sql_exception</classname> is thrown instead.</para>'>
 
 <!-- Notes for PCRE -->
 <!ENTITY pcre.pattern.warning '<para xmlns="http://docbook.org/ns/docbook">
@@ -2088,11 +2193,11 @@ See also the <link linkend="mysqlinfo.api.choosing">MySQL: choosing an API</link
 Alternatives to this function include:</para>'>
 
 <!ENTITY mysql.close.connections.result.sets '<para xmlns="http://docbook.org/ns/docbook">
-Open non-persistent MySQL connections and result sets are automatically destroyed when a 
-PHP script finishes its execution. So, while explicitly closing open 
-connections and freeing result sets is optional, doing so is recommended. 
-This will immediately return resources to PHP and MySQL, which can 
-improve performance. For related information, see 
+Open non-persistent MySQL connections and result sets are automatically destroyed when a
+PHP script finishes its execution. So, while explicitly closing open
+connections and freeing result sets is optional, doing so is recommended.
+This will immediately return resources to PHP and MySQL, which can
+improve performance. For related information, see
 <link linkend="language.types.resource.self-destruct">freeing resources</link></para>'>
 
 <!-- Sybase Notes -->
@@ -2451,6 +2556,34 @@ to be references, then they must be references in the passed argument list.'>
 
 <!ENTITY reflection.export.param.name 'The reflection to export.'>
 
+<!ENTITY reflection.getattributes.param.name '<varlistentry xmlns="http://docbook.org/ns/docbook">
+<term><parameter>name</parameter></term>
+<listitem>
+ <para>
+  Filter the results to include only <classname>ReflectionAttribute</classname>
+  instances for attributes matching this class name.
+ </para>
+</listitem>
+</varlistentry>'>
+
+<!ENTITY reflection.getattributes.param.flags '<varlistentry xmlns="http://docbook.org/ns/docbook">
+<term><parameter>flags</parameter></term>
+<listitem>
+ <para>
+  Flags for determining how to filter the results, if <parameter>name</parameter>
+  is provided.
+ </para>
+ <para>
+  Default is <literal>0</literal> which will only return results for attributes that
+  are of the class <parameter>name</parameter>.
+ </para>
+ <para>
+  The only other option available, is to use <constant>ReflectionAttribute::IS_INSTANCEOF</constant>,
+  which will instead use <literal>instanceof</literal> for filtering.
+ </para>
+</listitem>
+</varlistentry>'>
+
 <!-- SPL -->
 <!ENTITY spl.datastructures.intro.title '<title xmlns="http://docbook.org/ns/docbook">Datastructures</title>'>
 
@@ -2662,9 +2795,9 @@ paths</simpara></warning>
 <!ENTITY mongo.gridfs.store.return '<para xmlns="http://docbook.org/ns/docbook">Returns the <literal>_id</literal> of the saved file document. This will be a generated <classname>MongoId</classname> unless an <literal>_id</literal> was explicitly specified in the <parameter>metadata</parameter> parameter.</para>'>
 <!ENTITY mongo.mongowritebatch.writeoptions.description '<listitem xmlns="http://docbook.org/ns/docbook"><para>An array of Write Options.<informaltable><thead><row><entry>key</entry><entry>value meaning</entry></row></thead><tbody><row><entry>w (int|string)</entry><entry><link linkend="mongo.writeconcerns">Write concern</link> value</entry></row><row><entry>wtimeout (int)</entry><entry><link linkend="mongo.writeconcerns">Maximum time to wait for replication</link></entry></row><row><entry>ordered</entry><entry>Determines if MongoDB must apply this batch in order. Ordered writes execute serially (i.e. one at a time) and execution will stop after the first error. Unordered writes may execute in parallel and execution will not stop after the first error. Defaults to &true;</entry></row><row><entry>j (bool)</entry><entry>Wait for journaling on the primary. This value is discouraged, use WriteConcern instead</entry></row><row><entry>fsync (bool)</entry><entry>Wait for fsync on the primary. This value is discouraged, use WriteConcern instead</entry></row></tbody></informaltable></para></listitem>'>
 <!ENTITY mongo.mongowritebatch.collection.description '<listitem xmlns="http://docbook.org/ns/docbook"><para>The <classname>MongoCollection</classname> to execute the batch on. Its <link linkend="mongo.writeconcerns">write concern</link> will be copied and used as the default write concern if none is given as <parameter>$write_options</parameter> or during <methodname>MongoWriteBatch::execute</methodname>.</para></listitem>'>
-<!ENTITY mongo.context.server ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>server</parameter> </term> <listitem> <para> An array containing the basic information about the server that was picked. <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>hash</entry> <entry>server hash, example: <literal>localhost:27017;-;X;56052</literal></entry> </row> <row> <entry>type</entry> <entry>Node type (primary/secondary/mongos/arbiter): <literal>2</literal></entry> </row> <row> <entry>max_bson_size</entry> <entry>The maximum BSON Size over the wire this node accepts: <literal>16777216</literal></entry> </row> <row> <entry>max_message_size</entry> <entry>The maximum Message Size over the wire this node accepts: <literal>48000000</literal></entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'> 
-<!ENTITY mongo.context.writeoptions '<varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>writeOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>ordered</entry> <entry>boolean, if the operation (in case of batch operation) must be executed sequentually (ordered=true)</entry> </row> <row> <entry>writeConcern</entry> <entry>An array of writeConcern options (see below)</entry> </row> </tbody> </tgroup> </informaltable> <table> <title>writeConcern array values</title> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>fsync</entry> <entry>boolean, force flushing to disk before returning</entry> </row> <row> <entry>j</entry> <entry>boolean, force journal write before returning</entry> </row> <row> <entry>wtimeout</entry> <entry>integer, milliseconds, maximum time the primary is allowed to wait to verify replication</entry> </row> <row> <entry>w</entry> <entry>integer=server count, or string=replication-tag</entry> </row> </tbody> </tgroup> </table> </para> </listitem> </varlistentry>'> 
-<!ENTITY mongo.context.protocoloptions ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>protocolOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>message_length</entry> <entry>The total size (in bytes) of the encoded message being sent over the wire</entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> <row> <entry>namespace</entry> <entry>The MongoDB namespace used for the protocol message <literal>dbname.collectionname</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'> 
+<!ENTITY mongo.context.server ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>server</parameter> </term> <listitem> <para> An array containing the basic information about the server that was picked. <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>hash</entry> <entry>server hash, example: <literal>localhost:27017;-;X;56052</literal></entry> </row> <row> <entry>type</entry> <entry>Node type (primary/secondary/mongos/arbiter): <literal>2</literal></entry> </row> <row> <entry>max_bson_size</entry> <entry>The maximum BSON Size over the wire this node accepts: <literal>16777216</literal></entry> </row> <row> <entry>max_message_size</entry> <entry>The maximum Message Size over the wire this node accepts: <literal>48000000</literal></entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'>
+<!ENTITY mongo.context.writeoptions '<varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>writeOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>ordered</entry> <entry>boolean, if the operation (in case of batch operation) must be executed sequentually (ordered=true)</entry> </row> <row> <entry>writeConcern</entry> <entry>An array of writeConcern options (see below)</entry> </row> </tbody> </tgroup> </informaltable> <table> <title>writeConcern array values</title> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>fsync</entry> <entry>boolean, force flushing to disk before returning</entry> </row> <row> <entry>j</entry> <entry>boolean, force journal write before returning</entry> </row> <row> <entry>wtimeout</entry> <entry>integer, milliseconds, maximum time the primary is allowed to wait to verify replication</entry> </row> <row> <entry>w</entry> <entry>integer=server count, or string=replication-tag</entry> </row> </tbody> </tgroup> </table> </para> </listitem> </varlistentry>'>
+<!ENTITY mongo.context.protocoloptions ' <varlistentry xmlns="http://docbook.org/ns/docbook"> <term> <parameter>protocolOptions</parameter> </term> <listitem> <para> <informaltable> <tgroup cols="2"> <thead> <row> <entry>key</entry> <entry>value</entry> </row> </thead> <tbody> <row> <entry>message_length</entry> <entry>The total size (in bytes) of the encoded message being sent over the wire</entry> </row> <row> <entry>request_id</entry> <entry>The request identifier for this message: <literal>42</literal></entry> </row> <row> <entry>namespace</entry> <entry>The MongoDB namespace used for the protocol message <literal>dbname.collectionname</literal></entry> </row> </tbody> </tgroup> </informaltable> </para> </listitem> </varlistentry>'>
 <!ENTITY mongo.alternative.class.note '<para
 xmlns="http://docbook.org/ns/docbook">This extension that defines this class
 is deprecated. Instead, the <link linkend="set.mongodb">MongoDB</link> extension should be used.
@@ -2747,7 +2880,7 @@ used.</para>'>
          <row xmlns="http://docbook.org/ns/docbook">
           <entry>keyVaultNamespace</entry>
           <entry><type>string</type></entry>
-          <entry>A fully qualified namespace (e.g. <literal>"databaseName.collectionName"</literal>) denoting the collection that contains all data keys used for encryption and decryption.</entry>
+          <entry>A fully qualified namespace (e.g. <literal>"databaseName.collectionName"</literal>) denoting the collection that contains all data keys used for encryption and decryption. This option is required.</entry>
          </row>
 '>
 <!ENTITY mongodb.option.encryption.kmsProviders '
@@ -2765,7 +2898,8 @@ used.</para>'>
 <![CDATA[
 aws: {
     accessKeyId: <string>,
-    secretAccessKey: <string>
+    secretAccessKey: <string>,
+    sessionToken: <optional string>
 }
 ]]>
            </programlisting>
@@ -2818,6 +2952,142 @@ local: {
           </entry>
          </row>
 '>
+<!ENTITY mongodb.option.encryption.masterKey-options-by-provider '
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"aws"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>region</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>key</entry>
+       <entry>string</entry>
+       <entry>Required. The Amazon Resource Name (ARN) to the AWS customer master key (CMK).</entry>
+      </row>
+      <row>
+       <entry>endpoint</entry>
+       <entry>string</entry>
+       <entry>Optional. An alternate host identifier to send KMS requests to. May include port number.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"azure"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>keyVaultEndpoint</entry>
+       <entry>string</entry>
+       <entry>Required. Host with optional port (e.g. "example.vault.azure.net").</entry>
+      </row>
+      <row>
+       <entry>keyName</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyVersion</entry>
+       <entry>string</entry>
+       <entry>Optional. A specific version of the named key. Defaults to using the key&apos;s primary version.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"gcp"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>projectId</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>location</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyRing</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyName</entry>
+       <entry>string</entry>
+       <entry>Required.</entry>
+      </row>
+      <row>
+       <entry>keyVersion</entry>
+       <entry>string</entry>
+       <entry>Optional. A specific version of the named key. Defaults to using the key&apos;s primary version.</entry>
+      </row>
+      <row>
+       <entry>endpoint</entry>
+       <entry>string</entry>
+       <entry>Optional. Host with optional port. Defaults to "cloudkms.googleapis.com".</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+  <para xmlns="http://docbook.org/ns/docbook">
+   <table>
+    <title><literal>"kmip"</literal> provider options</title>
+    <tgroup cols="3">
+     <thead>
+      <row>
+       <entry>Option</entry>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>keyId</entry>
+       <entry>string</entry>
+       <entry>Optional. Unique identifier to a 96-byte KMIP secret data managed object. If unspecified, the driver creates a random 96-byte KMIP secret data managed object.</entry>
+      </row>
+      <row>
+       <entry>endpoint</entry>
+       <entry>string</entry>
+       <entry>Optional. Host with optional port.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </para>
+'>
 <!ENTITY mongodb.option.encryption.tlsOptions '
          <row xmlns="http://docbook.org/ns/docbook">
           <entry>tlsOptions</entry>
@@ -2831,7 +3101,8 @@ local: {
 <provider>: {
     tlsCaFile: <optional string>,
     tlsCertificateKeyFile: <optional string>,
-    tlsCertificateKeyFilePassword: <optional string>
+    tlsCertificateKeyFilePassword: <optional string>,
+    tlsDisableOCSPEndpointCheck: <optional bool>
 }
 ]]>
            </programlisting>
@@ -3171,7 +3442,7 @@ local: {
     to specify which number argument to treat in the conversion.
    </para>
   </formalpara>
-  
+
   <para>
    <table>
     <title>Flags</title>
@@ -3541,6 +3812,27 @@ local: {
  </row>
 '>
 
+<!ENTITY strings.changelog.ascii-case-conversion '
+ <row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.2.0</entry>
+  <entry>
+   Case conversion no longer depends on the locale set with
+   <function>setlocale</function>. Only ASCII characters will be converted.
+  </entry>
+ </row>
+'>
+
+<!ENTITY strings.changelog.ascii-case-folding '
+ <row xmlns="http://docbook.org/ns/docbook">
+  <entry>8.2.0</entry>
+  <entry>
+   Case folding no longer depends on the locale set with
+   <function>setlocale</function>. Only ASCII case folding will be done.
+   Non-ASCII bytes will be compared by their byte value.
+  </entry>
+ </row>
+'>
+
 <!-- filter snippets -->
 <!ENTITY filter.param.filter '
  <varlistentry xmlns="http://docbook.org/ns/docbook">
@@ -3589,8 +3881,8 @@ local: {
  </listitem>
  <listitem>
   <simpara>
-   If none of the aforementioned sources are available, then an
-   <classname>Exception</classname> will be thrown.
+   If none of the aforementioned sources are available, then a
+   <classname>Random\RandomException</classname> will be thrown.
   </simpara>
  </listitem>
 </itemizedlist>
@@ -3599,13 +3891,7 @@ local: {
  <listitem xmlns="http://docbook.org/ns/docbook">
   <simpara>
    If an appropriate source of randomness cannot be found,
-   an <classname>Exception</classname> will be thrown.
-  </simpara>
- </listitem>
- <listitem xmlns="http://docbook.org/ns/docbook">
-  <simpara>
-    If invalid parameters are given, a <classname>TypeError</classname>
-    will be thrown.
+   a <classname>Random\RandomException</classname> will be thrown.
   </simpara>
  </listitem>
 '>
@@ -3619,6 +3905,15 @@ local: {
  </note>
 '>
 
+<!-- Random snippets -->
+<!ENTITY random.engineErrors '
+ <listitem xmlns="http://docbook.org/ns/docbook">
+  <simpara>
+   Any <classname>Throwable</classname>s thrown by the <methodname>Random\Engine::generate</methodname> method
+   of the underlying <link linkend="random-randomizer.props.engine"><literal>Random\Randomizer::$engine</literal></link>.
+  </simpara>
+ </listitem>
+'>
 
 <!-- UOPZ snippets -->
 
@@ -3632,7 +3927,7 @@ xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
  <entry>8.0.0</entry>
  <entry>
   <parameter>parser</parameter> expects an <classname>XMLParser</classname>
-  instance now; previously, a <type>resource</type> was expected.
+  instance now; previously, a valid <literal>xml</literal> <type>resource</type> was expected.
  </entry>
 </row>'>
 
@@ -3645,7 +3940,7 @@ xmlns="http://docbook.org/ns/docbook"><simpara>This function has been
     with servers with valid SSL certificates, as distributors generally
     configure OpenSSL to use known good CA bundles.
    </para>
-   
+
    <para xmlns="http://docbook.org/ns/docbook">
     The default CA bundle may be overridden on a global basis by setting
     either the openssl.cafile or openssl.capath configuration setting, or on a

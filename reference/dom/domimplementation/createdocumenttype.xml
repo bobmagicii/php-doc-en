@@ -9,7 +9,7 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+  <methodsynopsis role="DOMImplementation">
    <modifier>public</modifier> <type class="union"><type>DOMDocumentType</type><type>false</type></type><methodname>DOMImplementation::createDocumentType</methodname>
    <methodparam><type>string</type><parameter>qualifiedName</parameter></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>publicId</parameter><initializer>""</initializer></methodparam>
@@ -56,7 +56,7 @@
   &reftitle.returnvalues;
   <para>
    A new <classname>DOMDocumentType</classname> node with its 
-   <literal>ownerDocument</literal> set to &null;.
+   <literal>ownerDocument</literal> set to &null; or &false; on error.
   </para>
  </refsect1>
  <refsect1 role="errors">

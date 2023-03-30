@@ -9,7 +9,7 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+  <methodsynopsis role="PDOStatement">
    <modifier>public</modifier> <type>int</type><methodname>PDOStatement::columnCount</methodname>
    <void/>
   </methodsynopsis>
@@ -41,6 +41,11 @@
    PDOStatement object, even if the result set is empty. If there is no result set,
    <methodname>PDOStatement::columnCount</methodname> returns <literal>0</literal>.
   </para>
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
  </refsect1>
 
  <refsect1 role="examples">
@@ -96,7 +101,6 @@ After execute(), result set has 2 columns (should be 2)
  </refsect1>
 
 </refentry>
-
 <!-- Keep this comment at the end of the file
 Local variables:
 mode: sgml

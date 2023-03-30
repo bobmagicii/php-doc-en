@@ -9,7 +9,7 @@
  </refnamediv>
  <refsect1 role="description">
   &reftitle.description;
-  <methodsynopsis>
+  <methodsynopsis role="PDO">
    <modifier>public</modifier> <type class="union"><type>int</type><type>false</type></type><methodname>PDO::exec</methodname>
    <methodparam><type>string</type><parameter>statement</parameter></methodparam>
   </methodsynopsis>
@@ -69,6 +69,11 @@ $db->exec() or die(print_r($db->errorInfo(), true)); // incorrect
    </programlisting>
   </para>
 
+ </refsect1>
+
+ <refsect1 role="errors">
+  &reftitle.errors;
+  &pdo.errors;
  </refsect1>
 
  <refsect1 role="examples">
